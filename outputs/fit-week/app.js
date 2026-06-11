@@ -317,7 +317,6 @@ function addExercise(day) {
     sets: "3",
     reps: "10",
     load: "",
-    notes: "",
     videoUrl: "",
     mediaUrl: "",
     done: false,
@@ -408,7 +407,6 @@ function exerciseCard(day, exercise) {
     sets: node.querySelector(".exercise-sets"),
     reps: node.querySelector(".exercise-reps"),
     load: node.querySelector(".exercise-load"),
-    notes: node.querySelector(".exercise-notes"),
     videoUrl: node.querySelector(".exercise-video"),
     mediaUrl: node.querySelector(".exercise-media"),
     done: node.querySelector(".exercise-done"),
@@ -424,7 +422,6 @@ function exerciseCard(day, exercise) {
   fields.sets.value = exercise.sets || "";
   fields.reps.value = exercise.reps || "";
   fields.load.value = exercise.load || "";
-  fields.notes.value = exercise.notes || "";
   fields.videoUrl.value = exercise.videoUrl || "";
   fields.mediaUrl.value = exercise.mediaUrl || "";
   fields.done.checked = exercise.done;
