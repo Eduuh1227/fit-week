@@ -413,6 +413,10 @@ h3 {
   margin: 18px 0;
 }
 
+.wide-field {
+  grid-column: 1 / -1;
+}
+
 label {
   display: grid;
   gap: 7px;

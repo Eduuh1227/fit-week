@@ -1,6 +1,7 @@
-const STORAGE_KEY = "fitweek-planner-v1";
+const STORAGE_KEY = "fitweek-planner-v2";
 
 const workoutTypes = [
+  "Treino personalizado",
   "Peito e tríceps",
   "Costas e bíceps",
   "Pernas",
@@ -21,42 +22,6 @@ const days = [
   { key: "sunday", label: "Domingo", short: "Dom" },
 ];
 
-const starterExercises = {
-  "Peito e tríceps": [
-    ["Supino reto", "4", "8-10", "40 kg"],
-    ["Crucifixo inclinado", "3", "10-12", "14 kg"],
-    ["Tríceps corda", "3", "12", "25 kg"],
-  ],
-  "Costas e bíceps": [
-    ["Puxada alta", "4", "8-10", "45 kg"],
-    ["Remada baixa", "3", "10-12", "40 kg"],
-    ["Rosca direta", "3", "10", "20 kg"],
-  ],
-  Pernas: [
-    ["Agachamento livre", "4", "8-10", "60 kg"],
-    ["Leg press", "4", "10-12", "120 kg"],
-    ["Mesa flexora", "3", "12", "35 kg"],
-  ],
-  Ombros: [
-    ["Desenvolvimento", "4", "8-10", "22 kg"],
-    ["Elevação lateral", "3", "12", "8 kg"],
-    ["Face pull", "3", "12-15", "20 kg"],
-  ],
-  Abdômen: [
-    ["Prancha", "3", "45 s", "Peso corporal"],
-    ["Crunch na polia", "3", "12-15", "25 kg"],
-  ],
-  Cardio: [
-    ["Esteira intervalada", "1", "20 min", "Moderado"],
-    ["Bicicleta", "1", "15 min", "Leve"],
-  ],
-  "Treino full body": [
-    ["Agachamento goblet", "3", "10", "24 kg"],
-    ["Supino halteres", "3", "10", "18 kg"],
-    ["Remada curvada", "3", "10", "35 kg"],
-  ],
-};
-
 const defaultState = {
   selectedDay: "monday",
   profile: {
@@ -64,19 +29,13 @@ const defaultState = {
     goal: "Hipertrofia",
     level: "Iniciante",
   },
-  week: days.map((day, index) => {
-    const type =
-      ["Peito e tríceps", "Costas e bíceps", "Pernas", "Ombros", "Cardio", "Treino full body", "Descanso"][
-        index
-      ];
-
-    return {
-      ...day,
-      type,
-      completed: false,
-      exercises: buildExercises(type),
-    };
-  }),
+  week: days.map((day) => ({
+    ...day,
+    type: "Descanso",
+    customName: "",
+    completed: false,
+    exercises: [],
+  })),
 };
 
 let state = loadState();
@@ -92,18 +51,6 @@ function uid() {
   return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
 }
 
-function buildExercises(type) {
-  return (starterExercises[type] || []).map(([name, sets, reps, load]) => ({
-    id: uid(),
-    name,
-    sets,
-    reps,
-    load,
-    notes: "",
-    done: false,
-  }));
-}
-
 function loadState() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return structuredClone(defaultState);
@@ -117,7 +64,12 @@ function loadState() {
       week: days.map((day) => {
         const existing = parsed.week?.find((item) => item.key === day.key);
         if (!existing) return defaultState.week.find((item) => item.key === day.key);
-        return { ...day, ...existing, type: normalizeWorkoutType(existing.type) };
+        return {
+          ...day,
+          ...existing,
+          type: normalizeWorkoutType(existing.type),
+          customName: existing.customName || "",
+        };
       }),
     };
   } catch {
@@ -139,7 +91,7 @@ function todayKey() {
 }
 
 function plannedDays() {
-  return state.week.filter((day) => day.type !== "Descanso");
+  return state.week.filter(isTrainingDay);
 }
 
 function completedExercises(day) {
@@ -147,7 +99,16 @@ function completedExercises(day) {
 }
 
 function isWorkoutDone(day) {
-  return day.type !== "Descanso" && day.completed;
+  return isTrainingDay(day) && day.completed;
+}
+
+function isTrainingDay(day) {
+  return day.type !== "Descanso";
+}
+
+function workoutName(day) {
+  if (!isTrainingDay(day)) return "Descanso";
+  return day.customName?.trim() || day.type || "Treino personalizado";
 }
 
 function calculateSummary() {
@@ -175,14 +136,14 @@ function render() {
 function renderDashboard() {
   const today = state.week.find((day) => day.key === todayKey()) || state.week[0];
   const summary = calculateSummary();
-  const pendingList = state.week.filter((day) => day.type !== "Descanso" && !day.completed);
+  const pendingList = state.week.filter((day) => isTrainingDay(day) && !day.completed);
   const circumference = 302;
 
-  document.querySelector("#today-title").textContent = today.type;
+  document.querySelector("#today-title").textContent = workoutName(today);
   document.querySelector("#today-meta").textContent =
-    today.type === "Descanso"
-      ? `${today.label}: dia de recuperação programado.`
-      : `${today.label}: ${today.exercises.length} exercícios cadastrados.`;
+    isTrainingDay(today)
+      ? `${today.label}: ${today.exercises.length} exercícios cadastrados.`
+      : `${today.label}: personalize este dia quando quiser treinar.`;
   document.querySelector("#progress-title").textContent = `${summary.done} de ${summary.planned.length} treinos`;
   document.querySelector("#progress-copy").textContent =
     summary.pending === 0 && summary.planned.length
@@ -208,7 +169,7 @@ function renderDashboard() {
       const item = document.createElement("button");
       item.className = "pending-chip";
       item.type = "button";
-      item.textContent = `${day.label}: ${day.type}`;
+      item.textContent = `${day.label}: ${workoutName(day)}`;
       item.addEventListener("click", () => {
         state.selectedDay = day.key;
         setView("routine");
@@ -227,20 +188,21 @@ function renderWeek() {
     card.className = "day-card";
     card.type = "button";
     card.classList.toggle("is-selected", day.key === state.selectedDay);
-    card.classList.toggle("is-rest", day.type === "Descanso");
+    card.classList.toggle("is-rest", !isTrainingDay(day));
 
     const total = day.exercises.length;
     const done = completedExercises(day);
-    const status = day.type === "Descanso" ? "Descanso" : day.completed ? "Concluído" : "Pendente";
+    const status = !isTrainingDay(day) ? "Livre" : day.completed ? "Concluído" : "Pendente";
+    const exerciseCopy = total ? `${total} exercício${total === 1 ? "" : "s"}` : "Sem exercícios";
 
     card.innerHTML = `
       <div class="day-card-top">
         <span class="day-label">${day.label}</span>
         <span class="status-pill ${day.completed ? "done" : ""}">${status}</span>
       </div>
-      <p class="workout-type">${day.type}</p>
+      <p class="workout-type">${workoutName(day)}</p>
       <div class="day-card-bottom">
-        <span>${total} exercício${total === 1 ? "" : "s"}</span>
+        <span>${exerciseCopy}</span>
         <span>${done}/${total} feitos</span>
       </div>
     `;
@@ -272,7 +234,7 @@ function renderDetail() {
   completeButton.className = day.completed ? "secondary-button" : "primary-button";
   completeButton.type = "button";
   completeButton.textContent = day.completed ? "Reabrir treino" : "Marcar concluído";
-  completeButton.disabled = day.type === "Descanso";
+  completeButton.disabled = !isTrainingDay(day);
   completeButton.addEventListener("click", () => {
     day.completed = !day.completed;
     if (day.completed) day.exercises = day.exercises.map((exercise) => ({ ...exercise, done: true }));
@@ -284,7 +246,7 @@ function renderDetail() {
 
   const fieldRow = document.createElement("div");
   fieldRow.className = "field-row";
-  fieldRow.append(workoutSelect(day), activeToggle(day));
+  fieldRow.append(workoutNameInput(day), workoutSelect(day), activeToggle(day));
   dayDetail.append(fieldRow);
 
   const actions = document.createElement("div");
@@ -295,6 +257,9 @@ function renderDetail() {
   addButton.type = "button";
   addButton.textContent = "Adicionar exercício";
   addButton.addEventListener("click", () => {
+    if (!isTrainingDay(day)) {
+      day.type = "Treino personalizado";
+    }
     day.exercises.push({
       id: uid(),
       name: "Novo exercício",
@@ -314,6 +279,7 @@ function renderDetail() {
   clearButton.textContent = "Excluir treino";
   clearButton.addEventListener("click", () => {
     day.type = "Descanso";
+    day.customName = "";
     day.completed = false;
     day.exercises = [];
     render();
@@ -340,6 +306,27 @@ function renderDetail() {
   dayDetail.append(list);
 }
 
+function workoutNameInput(day) {
+  const label = document.createElement("label");
+  label.className = "wide-field";
+  label.textContent = "Nome do treino";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Ex: Push A, Glúteos, Cardio leve";
+  input.value = day.customName || "";
+  input.disabled = !isTrainingDay(day);
+  input.addEventListener("input", () => {
+    day.customName = input.value;
+    saveState();
+    renderDashboard();
+    renderWeek();
+  });
+
+  label.append(input);
+  return label;
+}
+
 function workoutSelect(day) {
   const label = document.createElement("label");
   label.textContent = "Tipo de treino";
@@ -354,10 +341,14 @@ function workoutSelect(day) {
   });
 
   select.addEventListener("change", () => {
-    const previousHadExercises = day.exercises.length > 0;
     day.type = select.value;
     day.completed = false;
-    day.exercises = select.value === "Descanso" ? [] : previousHadExercises ? day.exercises : buildExercises(select.value);
+    if (select.value === "Descanso") {
+      day.customName = "";
+      day.exercises = [];
+    } else if (!day.customName?.trim()) {
+      day.customName = select.value === "Treino personalizado" ? "" : select.value;
+    }
     render();
   });
 
@@ -374,10 +365,10 @@ function activeToggle(day) {
   input.checked = day.type !== "Descanso";
   input.addEventListener("change", () => {
     if (input.checked) {
-      day.type = "Treino full body";
-      day.exercises = buildExercises(day.type);
+      day.type = "Treino personalizado";
     } else {
       day.type = "Descanso";
+      day.customName = "";
       day.exercises = [];
     }
     day.completed = false;
