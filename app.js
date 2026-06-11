@@ -1,4 +1,4 @@
-const STORAGE_KEY = "fitweek-planner-v2";
+const STORAGE_KEY = "fitweek-planner-v3";
 
 const workoutTypes = [
   "Treino personalizado",
@@ -31,7 +31,7 @@ const defaultState = {
   },
   week: days.map((day) => ({
     ...day,
-    type: "Descanso",
+    type: "Treino personalizado",
     customName: "",
     completed: false,
     exercises: [],
