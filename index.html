@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitWeek Planner</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img src="./assets/gym-mark.svg" alt="" class="brand-mark" />
+          <div>
+            <p class="eyebrow">Planner semanal</p>
+            <h1>FitWeek</h1>
+          </div>
+        </div>
+        <nav class="top-actions" aria-label="Navegação principal">
+          <button class="nav-button is-active" data-view="dashboard">Resumo</button>
+          <button class="nav-button" data-view="routine">Rotina</button>
+          <button class="nav-button" data-view="profile">Perfil</button>
+        </nav>
+      </header>
+
+      <section class="dashboard-view" data-panel="dashboard">
+        <div class="summary-layout">
+          <section class="today-panel">
+            <div>
+              <p class="eyebrow">Treino de hoje</p>
+              <h2 id="today-title">Carregando</h2>
+              <p id="today-meta" class="muted">Sua rotina aparece aqui.</p>
+            </div>
+            <button class="primary-button" id="open-today">Abrir treino</button>
+          </section>
+
+          <section class="progress-panel">
+            <div class="progress-ring" aria-label="Progresso semanal">
+              <svg viewBox="0 0 120 120" role="img" aria-hidden="true">
+                <circle class="ring-track" cx="60" cy="60" r="48"></circle>
+                <circle class="ring-value" cx="60" cy="60" r="48" id="ring-value"></circle>
+              </svg>
+              <strong id="progress-percent">0%</strong>
+            </div>
+            <div>
+              <p class="eyebrow">Semana atual</p>
+              <h2 id="progress-title">0 de 0 treinos</h2>
+              <p id="progress-copy" class="muted">Monte sua divisão para acompanhar o progresso.</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="metric-grid" aria-label="Resumo semanal">
+          <article class="metric-card">
+            <span>Concluídos</span>
+            <strong id="done-count">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Pendentes</span>
+            <strong id="pending-count">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Dias de treino</span>
+            <strong id="training-days-count">0</strong>
+          </article>
+        </section>
+
+        <section class="pending-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Pendências</p>
+              <h2>Treinos ainda abertos</h2>
+            </div>
+          </div>
+          <div id="pending-list" class="pending-list"></div>
+        </section>
+      </section>
+
+      <section class="routine-view is-hidden" data-panel="routine">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Segunda a domingo</p>
+            <h2>Organize sua semana</h2>
+          </div>
+          <button class="secondary-button" id="reset-week">Resetar progresso</button>
+        </div>
+
+        <div class="routine-layout">
+          <section class="week-grid" id="week-grid" aria-label="Dias da semana"></section>
+
+          <aside class="day-detail" id="day-detail" aria-live="polite">
+            <div class="detail-empty">
+              <h2>Escolha um dia</h2>
+              <p class="muted">Clique em um card da semana para editar o treino, exercícios e progresso.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="profile-view is-hidden" data-panel="profile">
+        <div class="profile-layout">
+          <section class="profile-card">
+            <p class="eyebrow">Cadastro</p>
+            <h2>Seu perfil</h2>
+            <form id="profile-form" class="profile-form">
+              <label>
+                Nome
+                <input id="profile-name" type="text" placeholder="Ex: Eduardo" autocomplete="name" />
+              </label>
+              <label>
+                Objetivo
+                <select id="profile-goal">
+                  <option value="Hipertrofia">Hipertrofia</option>
+                  <option value="Força">Força</option>
+                  <option value="Condicionamento">Condicionamento</option>
+                  <option value="Emagrecimento">Emagrecimento</option>
+                  <option value="Saúde e consistência">Saúde e consistência</option>
+                </select>
+              </label>
+              <label>
+                Nivel
+                <select id="profile-level">
+                  <option value="Iniciante">Iniciante</option>
+                  <option value="Intermediário">Intermediário</option>
+                  <option value="Avançado">Avançado</option>
+                </select>
+              </label>
+              <button class="primary-button" type="submit">Salvar perfil</button>
+            </form>
+          </section>
+
+          <section class="profile-note">
+            <p class="eyebrow">Evolução</p>
+            <h2 id="profile-greeting">Pronto para treinar</h2>
+            <p class="muted">
+              Suas escolhas ficam salvas neste navegador. Você pode alterar os dias de treino,
+              exercícios e cargas sempre que sua rotina mudar.
+            </p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <template id="exercise-template">
+      <article class="exercise-card">
+        <div class="exercise-header">
+          <label>
+            Exercício
+            <input class="exercise-name" type="text" />
+          </label>
+          <button class="icon-button remove-exercise" type="button" aria-label="Excluir exercício">Remover</button>
+        </div>
+        <div class="exercise-fields">
+          <label>
+            Series
+            <input class="exercise-sets" type="number" min="1" inputmode="numeric" />
+          </label>
+          <label>
+            Reps
+            <input class="exercise-reps" type="text" />
+          </label>
+          <label>
+            Carga
+            <input class="exercise-load" type="text" />
+          </label>
+        </div>
+        <label>
+          Observações
+          <textarea class="exercise-notes" rows="2"></textarea>
+        </label>
+        <label class="done-toggle">
+          <input class="exercise-done" type="checkbox" />
+          <span>Exercício concluído</span>
+        </label>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

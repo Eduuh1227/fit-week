@@ -1,11 +1,11 @@
 # fit-week
 
-Aplicativo web estático para montar e acompanhar uma rotina semanal de academia.
+Aplicativo web estatico para montar e acompanhar uma rotina semanal de academia.
 
 ## Como abrir localmente
 
-Abra `outputs/fit-week/index.html` no navegador.
+Abra `index.html` no navegador.
 
 ## Deploy
 
-Para deploy em serviços como Vercel ou Netlify, use `outputs/fit-week` como pasta raiz/public directory do site estático.
+Este repositorio ja esta pronto para deploy estatico na Vercel. Use a raiz do projeto como root directory.
