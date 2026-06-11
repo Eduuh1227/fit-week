@@ -487,6 +487,29 @@ textarea:focus {
   background: rgba(255, 92, 119, 0.08);
 }
 
+.exercise-video-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.video-link {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 212, 255, 0.42);
+  border-radius: 8px;
+  padding: 0 14px;
+  color: var(--accent-2);
+  background: rgba(0, 212, 255, 0.08);
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .done-toggle {
   display: flex;
   align-items: center;
@@ -618,7 +641,8 @@ textarea:focus {
   .metric-grid,
   .week-grid,
   .field-row,
-  .exercise-fields {
+  .exercise-fields,
+  .exercise-video-row {
     grid-template-columns: 1fr;
   }
 
