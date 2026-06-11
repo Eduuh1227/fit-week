@@ -495,6 +495,10 @@ textarea:focus {
   margin-top: 12px;
 }
 
+.exercise-media-field {
+  margin-top: 12px;
+}
+
 .video-link {
   min-height: 42px;
   display: inline-flex;
@@ -508,6 +512,21 @@ textarea:focus {
   font-weight: 900;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.exercise-media-preview {
+  margin: 12px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b1118;
+}
+
+.exercise-media-image {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
 }
 
 .done-toggle {

@@ -319,6 +319,7 @@ function addExercise(day) {
     load: "",
     notes: "",
     videoUrl: "",
+    mediaUrl: "",
     done: false,
   });
   day.completed = false;
@@ -409,9 +410,15 @@ function exerciseCard(day, exercise) {
     load: node.querySelector(".exercise-load"),
     notes: node.querySelector(".exercise-notes"),
     videoUrl: node.querySelector(".exercise-video"),
+    mediaUrl: node.querySelector(".exercise-media"),
     done: node.querySelector(".exercise-done"),
   };
   const videoLink = node.querySelector(".video-link");
+  const mediaPreview = node.querySelector(".exercise-media-preview");
+  const mediaImage = node.querySelector(".exercise-media-image");
+  mediaImage.addEventListener("error", () => {
+    mediaPreview.classList.add("is-hidden");
+  });
 
   fields.name.value = exercise.name || "";
   fields.sets.value = exercise.sets || "";
@@ -419,14 +426,17 @@ function exerciseCard(day, exercise) {
   fields.load.value = exercise.load || "";
   fields.notes.value = exercise.notes || "";
   fields.videoUrl.value = exercise.videoUrl || "";
+  fields.mediaUrl.value = exercise.mediaUrl || "";
   fields.done.checked = exercise.done;
   updateVideoLink(videoLink, fields.videoUrl.value);
+  updateMediaPreview(mediaPreview, mediaImage, fields.mediaUrl.value);
 
   Object.entries(fields).forEach(([key, field]) => {
     const eventName = field.type === "checkbox" ? "change" : "input";
     field.addEventListener(eventName, () => {
       exercise[key] = field.type === "checkbox" ? field.checked : field.value;
       if (key === "videoUrl") updateVideoLink(videoLink, field.value);
+      if (key === "mediaUrl") updateMediaPreview(mediaPreview, mediaImage, field.value);
       day.completed = day.exercises.length > 0 && day.exercises.every((item) => item.done);
       saveState();
       renderDashboard();
@@ -449,6 +459,19 @@ function updateVideoLink(link, value) {
 
   link.classList.toggle("is-hidden", !isValid);
   if (isValid) link.href = url;
+}
+
+function updateMediaPreview(preview, image, value) {
+  const url = value.trim();
+  const isValid = /^https?:\/\//i.test(url);
+
+  preview.classList.toggle("is-hidden", !isValid);
+  if (!isValid) {
+    image.removeAttribute("src");
+    return;
+  }
+
+  image.src = url;
 }
 
 function renderProfile() {
