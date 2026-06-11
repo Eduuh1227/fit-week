@@ -256,22 +256,7 @@ function renderDetail() {
   addButton.className = "primary-button";
   addButton.type = "button";
   addButton.textContent = "Adicionar exercício";
-  addButton.addEventListener("click", () => {
-    if (!isTrainingDay(day)) {
-      day.type = "Treino personalizado";
-    }
-    day.exercises.push({
-      id: uid(),
-      name: "Novo exercício",
-      sets: "3",
-      reps: "10",
-      load: "",
-      notes: "",
-      done: false,
-    });
-    day.completed = false;
-    render();
-  });
+  addButton.addEventListener("click", () => addExercise(day));
 
   const clearButton = document.createElement("button");
   clearButton.className = "secondary-button";
@@ -304,6 +289,30 @@ function renderDetail() {
   });
 
   dayDetail.append(list);
+
+  const bottomAddButton = document.createElement("button");
+  bottomAddButton.className = "primary-button bottom-add-exercise";
+  bottomAddButton.type = "button";
+  bottomAddButton.textContent = "+ Adicionar exercício";
+  bottomAddButton.addEventListener("click", () => addExercise(day));
+  dayDetail.append(bottomAddButton);
+}
+
+function addExercise(day) {
+  if (!isTrainingDay(day)) {
+    day.type = "Treino personalizado";
+  }
+  day.exercises.push({
+    id: uid(),
+    name: "Novo exercício",
+    sets: "3",
+    reps: "10",
+    load: "",
+    notes: "",
+    done: false,
+  });
+  day.completed = false;
+  render();
 }
 
 function workoutNameInput(day) {
