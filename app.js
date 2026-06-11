@@ -125,6 +125,14 @@ function setView(view) {
   navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.view === view));
 }
 
+function scrollToWorkoutOnMobile() {
+  if (!window.matchMedia("(max-width: 880px)").matches) return;
+
+  requestAnimationFrame(() => {
+    dayDetail.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
 function render() {
   renderDashboard();
   renderWeek();
@@ -210,6 +218,7 @@ function renderWeek() {
     card.addEventListener("click", () => {
       state.selectedDay = day.key;
       render();
+      scrollToWorkoutOnMobile();
     });
 
     weekGrid.append(card);
